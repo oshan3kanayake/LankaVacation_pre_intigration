@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}All Tickets{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    .ticket-table th {
+        background: var(--green);
+        color: white;
+    }
+    .badge-open { background: #fff3e0; color: var(--orange); }
+    .badge-closed { background: #e8f5e9; color: var(--green); }
+    .badge-resolved { background: #e3f2fd; color: #1976d2; }
+    .nav-tabs .nav-link.active {
+        background-color: var(--green);
+        color: white;
+        border-color: var(--green);
+    }
+    .nav-tabs .nav-link {
+        color: var(--green);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <h2 class="mb-4" style="color: var(--green); font-family: 'Playfair Display', serif;">All Support Tickets</h2>
+
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'all' %}active{% endif %}" href="{{ url_for('admin.tickets', filter='all') }}">All Tickets</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'replied' %}active{% endif %}" href="{{ url_for('admin.tickets', filter='replied') }}">With Replies</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'unreplied' %}active{% endif %}" href="{{ url_for('admin.tickets', filter='unreplied') }}">Without Replies</a>
+        </li>
+    </ul>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Subject</th>
+                    <th>User</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td>#{{ ticket.id }}</td>
+                    <td>{{ ticket.subject }}</td>
+                    <td>{{ ticket.user.name }}</td>
+                    <td><span class="badge badge-{{ ticket.status }}">{{ ticket.status|upper }}</span></td>
+                    <td>{{ ticket.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('admin.ticket_detail', ticket_id=ticket.id) }}" class="btn btn-sm btn-primary">View</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted">No tickets found.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

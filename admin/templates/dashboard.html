@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block head %}
+{{ super() }}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  .dashboard-header {
+    background: linear-gradient(135deg, var(--green), #1e3f1f);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: transform 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(44, 95, 45, 0.1);
+  }
+
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  .stat-label {
+    color: var(--green);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .section-title {
+    color: var(--green);
+    font-family: 'Playfair Display', serif;
+    margin: 2rem 0 1rem;
+  }
+
+  .list-item {
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+
+  .badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .badge-open {
+    background: #fff3e0;
+    color: var(--orange);
+  }
+
+  .badge-closed {
+    background: #e8f5e9;
+    color: var(--green);
+  }
+
+  .badge-resolved {
+    background: #e3f2fd;
+    color: #1976d2;
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="dashboard-header">
+  <div class="container">
+    <h1 data-aos="fade-up">Admin Dashboard</h1>
+    <p class="lead" data-aos="fade-up" data-aos-delay="100">Welcome, {{ current_user.name }}</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-end mb-4 gap-2">
+    <a href="{{ url_for('admin.tickets') }}" class="btn btn-outline-success"
+      style="border-color: var(--green); color: var(--green);">Manage All Tickets</a>
+    <a href="{{ url_for('admin.reviews') }}" class="btn btn-outline-warning"
+      style="border-color: var(--orange); color: var(--orange);">Manage All Reviews</a>
+  </div>
+  <!-- Stats Row -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-3">
+      <div class="stat-card" data-aos="fade-up">
+        <div class="stat-number">{{ total_users }}</div>
+        <div class="stat-label">Users</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card" data-aos="fade-up" data-aos-delay="50">
+        <div class="stat-number">{{ total_bookings }}</div>
+        <div class="stat-label">Bookings</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+        <div class="stat-number">{{ total_tickets }}</div>
+        <div class="stat-label">Tickets</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card" data-aos="fade-up" data-aos-delay="150">
+        <div class="stat-number">{{ total_packages + total_hotels }}</div>
+        <div class="stat-label">Listings</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revenue Chart -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h3 class="section-title">Monthly Revenue (USD)</h3>
+      <div class="card p-3">
+        <canvas id="revenueChart" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popular Items & Recent Tickets -->
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="section-title">Popular Packages</h3>
+      <div class="card p-3">
+        {% for pkg in popular_packages %}
+        <div class="list-item d-flex justify-content-between align-items-center">
+          <span>{{ pkg.title }}</span>
+          <span class="badge" style="background: var(--green); color: white;">{{ pkg.count }} bookings</span>
+        </div>
+        {% else %}
+        <p class="text-muted">No package bookings yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="section-title">Popular Hotels</h3>
+      <div class="card p-3">
+        {% for hotel in popular_hotels %}
+        <div class="list-item d-flex justify-content-between align-items-center">
+          <span>{{ hotel.name }}</span>
+          <span class="badge" style="background: var(--green); color: white;">{{ hotel.count }} bookings</span>
+        </div>
+        {% else %}
+        <p class="text-muted">No hotel bookings yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-5">
+    <div class="col-12">
+      <h3 class="section-title">Recent Tickets</h3>
+      <div class="card p-3">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Subject</th>
+              <th>User</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ticket in recent_tickets %}
+            <tr>
+              <td>#{{ ticket.id }}</td>
+              <td>{{ ticket.subject }}</td>
+              <td>{{ ticket.user.name }}</td>
+              <td><span class="badge badge-{{ ticket.status }}">{{ ticket.status|upper }}</span></td>
+              <td>{{ ticket.created_at.strftime('%d %b %Y') }}</td>
+              <td><a href="{{ url_for('admin.ticket_detail', ticket_id=ticket.id) }}"
+                  class="btn btn-sm btn-outline-primary">View</a></td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="6" class="text-muted">No tickets yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{ months| tojson }},
+    datasets: [{
+      label: 'Revenue (USD)',
+      data: {{ revenue_data| tojson }},
+    backgroundColor: 'rgba(44, 95, 45, 0.6)',
+    borderColor: 'var(--green)',
+    borderWidth: 2
+  }]
+  },
+    options: {
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    },
+    responsive: true
+  }
+  });
+  });
+</script>
+{% endblock %}

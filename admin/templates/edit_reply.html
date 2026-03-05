@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Edit Reply{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    .edit-card {
+        background: var(--cream);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    .edit-card .card-header {
+        background: transparent;
+        border-bottom: 2px solid var(--orange);
+        padding: 2rem 2rem 1rem;
+        text-align: center;
+    }
+    .edit-card .card-header h2 {
+        color: var(--green);
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+    }
+    .edit-card .card-body {
+        padding: 2rem;
+    }
+    .btn-update {
+        background: var(--green);
+        color: white;
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 40px;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    .btn-update:hover {
+        background: var(--orange);
+        transform: translateY(-3px);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5" style="min-height: 80vh; display: flex; align-items: center;">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-8 col-lg-6">
+            <div class="edit-card">
+                <div class="card-header">
+                    <h2>Edit Reply</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <textarea name="reply" class="form-control" rows="6" required>{{ reply.reply }}</textarea>
+                        <button type="submit" class="btn-update mt-4">Update Reply</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
