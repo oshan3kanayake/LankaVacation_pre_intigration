@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Book {{ hotel.name }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    .booking-form-card {
+        background: var(--cream);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    .booking-form-card .card-header {
+        background: transparent;
+        border-bottom: 2px solid var(--orange);
+        padding: 2rem 2rem 1rem;
+        text-align: center;
+    }
+    .booking-form-card .card-header h2 {
+        color: var(--green);
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+    }
+    .booking-form-card .card-body {
+        padding: 2rem;
+    }
+    .form-label {
+        color: var(--green);
+        font-weight: 600;
+    }
+    .form-control {
+        border: 2px solid transparent;
+        background: white;
+        padding: 0.8rem 1.2rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: var(--orange);
+        box-shadow: none;
+        outline: none;
+    }
+    .btn-submit {
+        background: var(--green);
+        color: white;
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 40px;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    .btn-submit:hover {
+        background: var(--orange);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(44, 95, 45, 0.3);
+    }
+    .hotel-summary {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--orange);
+    }
+    .hotel-summary h4 {
+        color: var(--green);
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-6" style="min-height: 80vh; display: flex; align-items: center;">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-8 col-lg-6" data-aos="fade-up">
+            <div class="booking-form-card">
+                <div class="card-header">
+                    <h2>Book {{ hotel.name }}</h2>
+                    <p class="text-muted">{{ hotel.location }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="hotel-summary">
+                        <h4>{{ hotel.name }}</h4>
+                        <p class="mb-1">{{ hotel.location }}</p>
+                        <p class="mb-0 fw-bold" style="color: var(--orange);">${{ "%.2f"|format(hotel.price_per_night) }}/night</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('hotel.create_hotel_booking', hotel_id=hotel.id) }}">
+                        <div class="mb-3">
+                            <label class="form-label">Check‑in Date</label>
+                            <input type="date" name="check_in" class="form-control" required min="{{ now().strftime('%Y-%m-%d') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Check‑out Date</label>
+                            <input type="date" name="check_out" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Number of Rooms</label>
+                            <input type="number" name="rooms" class="form-control" min="1" value="1" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Total Price (USD)</label>
+                            <input type="number" step="0.01" name="total_price" class="form-control" required placeholder="e.g., 250.00">
+                            <small class="text-muted">Calculate based on nights × rooms × price per night.</small>
+                        </div>
+                        <button type="submit" class="btn-submit">Confirm Booking</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ hotel.name }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    .detail-header {
+        background: linear-gradient(135deg, var(--green), #1e3f1f);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+    }
+    .hotel-image {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    .hotel-image img {
+        width: 100%;
+        height: auto;
+    }
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+    .price-tag {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--orange);
+    }
+    .btn-book {
+        background: var(--orange);
+        color: white;
+        padding: 1rem 3rem;
+        border: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-book:hover {
+        background: var(--green);
+        transform: translateY(-3px);
+    }
+    .btn-back {
+        background: transparent;
+        border: 2px solid var(--green);
+        color: var(--green);
+        padding: 0.8rem 2rem;
+        border-radius: 40px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-back:hover {
+        background: var(--green);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="detail-header">
+    <div class="container">
+        <h1 data-aos="fade-up">{{ hotel.name }}</h1>
+        <p class="lead" data-aos="fade-up" data-aos-delay="100">{{ hotel.location }}</p>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8" data-aos="fade-right">
+            <div class="hotel-image mb-4">
+                <img src="{{ url_for('static', filename=hotel.image) }}" alt="{{ hotel.name }}" class="img-fluid">
+            </div>
+            <div class="info-card">
+                <h3>About This Hotel</h3>
+                <p>{{ hotel.description or 'A wonderful place to stay.' }}</p>
+            </div>
+        </div>
+        <div class="col-lg-4" data-aos="fade-left">
+            <div class="info-card">
+                <h3>Booking Info</h3>
+                <p><strong>Price per night:</strong> ${{ "%.2f"|format(hotel.price_per_night) }}</p>
+                <p><strong>Location:</strong> {{ hotel.location }}</p>
+                <div class="text-center mt-4">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('hotel.create_hotel_booking', hotel_id=hotel.id) }}" class="btn-book">Book Now</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn-book">Login to Book</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a href="{{ url_for('hotels.all_hotels') }}" class="btn-back">← Back to Hotels</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Hotels{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+  .page-header {
+    background: linear-gradient(135deg, var(--green), #1e3f1f);
+    color: white;
+    padding: 3rem 0 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  .hotel-card {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: white;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    height: 100%;
+  }
+  .hotel-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(44, 95, 45, 0.15);
+  }
+  .hotel-card .img-wrap {
+    height: 200px;
+    overflow: hidden;
+  }
+  .hotel-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+  .hotel-card:hover img {
+    transform: scale(1.06);
+  }
+  .hotel-card .card-body {
+    padding: 1.5rem;
+  }
+  .hotel-card .card-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--green);
+    margin-bottom: 0.5rem;
+  }
+  .hotel-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--orange);
+  }
+  .btn-view {
+    background: var(--green);
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 40px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  .btn-view:hover {
+    background: var(--orange);
+    transform: translateY(-2px);
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+  <div class="container">
+    <h1 data-aos="fade-up">Hotels in Sri Lanka</h1>
+    <p class="lead" data-aos="fade-up" data-aos-delay="100">Find your perfect stay</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+    {% for hotel in hotels %}
+    <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 50 }}">
+      <div class="hotel-card">
+        <div class="img-wrap">
+          <img src="{{ url_for('static', filename=hotel.image) }}" alt="{{ hotel.name }}">
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">{{ hotel.name }}</h5>
+          <p class="card-text text-muted">{{ hotel.location }}</p>
+          <p class="hotel-price">${{ "%.2f"|format(hotel.price_per_night) }}/night</p>
+          <a href="{{ url_for('hotels.hotel_detail', hotel_id=hotel.id) }}" class="btn-view">View Details</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

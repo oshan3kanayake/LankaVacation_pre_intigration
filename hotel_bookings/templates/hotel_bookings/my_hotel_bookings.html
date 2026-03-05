@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}My Hotel Bookings{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--green), #1e3f1f);
+        color: white;
+        padding: 3rem 0 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+    }
+    .booking-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    .booking-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .booking-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 30px rgba(44, 95, 45, 0.15);
+    }
+    .card-header {
+        background: var(--green);
+        color: white;
+        padding: 1rem 1.5rem;
+    }
+    .card-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+    }
+    .card-body {
+        padding: 1.5rem;
+        flex: 1;
+    }
+    .detail-row {
+        display: flex;
+        margin-bottom: 0.75rem;
+        border-bottom: 1px dashed #eee;
+        padding-bottom: 0.5rem;
+    }
+    .detail-label {
+        font-weight: 600;
+        color: var(--green);
+        width: 100px;
+        font-size: 0.95rem;
+    }
+    .detail-value {
+        color: var(--gray);
+        flex: 1;
+        font-size: 0.95rem;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 0.3rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .status-pending {
+        background: #fff3e0;
+        color: var(--orange);
+        border: 1px solid var(--orange);
+    }
+    .status-confirmed {
+        background: #e8f5e9;
+        color: var(--green);
+        border: 1px solid var(--green);
+    }
+    .status-cancelled {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #c62828;
+    }
+    .card-footer {
+        background: #f8f9fa;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        border-top: 1px solid #eee;
+    }
+    .btn-action {
+        padding: 0.4rem 1.2rem;
+        border-radius: 40px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-edit {
+        background: var(--green);
+        color: white;
+    }
+    .btn-edit:hover {
+        background: #1e4f1f;
+        transform: translateY(-2px);
+        color: white;
+    }
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+    }
+    .btn-delete:hover {
+        background: #b02a37;
+        transform: translateY(-2px);
+        color: white;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--cream);
+        border-radius: 20px;
+        margin: 2rem 0;
+    }
+    .empty-state h3 {
+        color: var(--green);
+        font-family: 'Playfair Display', serif;
+        margin-bottom: 1rem;
+    }
+    @media (max-width: 768px) {
+        .booking-grid {
+            grid-template-columns: 1fr;
+        }
+        .detail-row {
+            flex-direction: column;
+        }
+        .detail-label {
+            width: 100%;
+            margin-bottom: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div class="container">
+        <h1 data-aos="fade-up">My Hotel Bookings</h1>
+        <p class="lead" data-aos="fade-up" data-aos-delay="100">Manage your hotel reservations</p>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12 text-end">
+            <a href="{{ url_for('hotels.all_hotels') }}" class="btn btn-primary" style="background: var(--green); border: none; border-radius: 40px;">Browse Hotels</a>
+        </div>
+    </div>
+
+    {% if bookings %}
+    <div class="booking-grid">
+        {% for booking in bookings %}
+        <div class="booking-card" data-aos="fade-up" data-aos-delay="{{ loop.index * 50 }}">
+            <div class="card-header">
+                <h3>{{ booking.hotel.name }}</h3>  <!-- Now using relationship -->
+            </div>
+            <div class="card-body">
+                <div class="detail-row">
+                    <span class="detail-label">Check‑in</span>
+                    <span class="detail-value">{{ booking.check_in.strftime('%d %b %Y') }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Check‑out</span>
+                    <span class="detail-value">{{ booking.check_out.strftime('%d %b %Y') }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Rooms</span>
+                    <span class="detail-value">{{ booking.rooms }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Total</span>
+                    <span class="detail-value">${{ "%.2f"|format(booking.total_price) }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value">
+                            <span class="status-badge
+                                {% if booking.status == 'pending' %}status-pending
+                                {% elif booking.status == 'confirmed' %}status-confirmed
+                                {% else %}status-cancelled{% endif %}">
+                                {{ booking.status|upper }}
+                            </span>
+                        </span>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('hotel.edit_hotel_booking', booking_id=booking.id) }}" class="btn-action btn-edit">Edit</a>
+                <form method="POST" action="{{ url_for('hotel.delete_hotel_booking', booking_id=booking.id) }}" style="display: inline;" onsubmit="return confirm('Cancel this hotel booking?');">
+                    <button type="submit" class="btn-action btn-delete">Cancel</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" data-aos="fade-up">
+        <h3>No Hotel Bookings</h3>
+        <p class="text-muted mb-4">You haven't booked any hotels yet. Find your perfect stay!</p>
+        <a href="{{ url_for('hotels.all_hotels') }}" class="btn btn-primary px-4 py-2" style="border-radius: 40px;">Browse Hotels</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
