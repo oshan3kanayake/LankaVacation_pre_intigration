@@ -1,5 +1,5 @@
 from flask import Blueprint
 
-bookings_bp = Blueprint('bookings', __name__, template_folder='templates/bookings')
+packages_bp = Blueprint('packages', __name__, template_folder='templates/packages')
 
 from . import routes

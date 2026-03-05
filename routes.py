@@ -1,60 +1,50 @@
-from flask import render_template, redirect, url_for, flash, request, abort
-from flask_login import login_required, current_user
-from extensions import db
-from models import Booking, Package  # Fixed: Package (singular), not Packages
-from . import bookings_bp
-from datetime import datetime
+from flask import render_template
+from models import Package
+from . import packages_bp
 
-@bookings_bp.route('/my-bookings')
-@login_required
-def my_bookings():
-    bookings = Booking.query.filter_by(user_id=current_user.id).order_by(Booking.booking_date.desc()).all()
-    return render_template('my_bookings.html', bookings=bookings)
+@packages_bp.route('/')
+def all_packages():
+    packages = Package.query.all()
+    return render_template('all_packages.html', packages=packages)
 
-@bookings_bp.route('/create/<int:package_id>', methods=['GET', 'POST'])
-@login_required
-def create_booking(package_id):
+@packages_bp.route('/<int:package_id>')
+def package_detail(package_id):
     package = Package.query.get_or_404(package_id)
-    if request.method == 'POST':
-        travel_date = datetime.strptime(request.form.get('travel_date'), '%Y-%m-%d').date()
-        guests = int(request.form.get('guests'))
-        special_requests = request.form.get('special_requests')
-        booking = Booking(
-            user_id=current_user.id,
-            package_id=package.id,
-            travel_date=travel_date,
-            guests=guests,
-            special_requests=special_requests,
-            status='pending'
-        )
-        db.session.add(booking)
-        db.session.commit()
-        flash('Booking created successfully!', 'success')
-        return redirect(url_for('bookings.my_bookings'))
-    return render_template('create_booking.html', package=package, now=datetime.now)
+    return render_template('package_detail.html', package=package)
 
-@bookings_bp.route('/edit/<int:booking_id>', methods=['GET', 'POST'])
-@login_required
-def edit_booking(booking_id):
-    booking = Booking.query.get_or_404(booking_id)
-    if booking.user_id != current_user.id:
-        abort(403)
-    if request.method == 'POST':
-        booking.travel_date = datetime.strptime(request.form.get('travel_date'), '%Y-%m-%d').date()
-        booking.guests = int(request.form.get('guests'))
-        booking.special_requests = request.form.get('special_requests')
+    @bookings_bp.route('/add-more-packages')
+    def add_more_packages():
+        from models import Package
+    if Package.query.count() < 6:  # Only add if we have fewer than 6
+        more_packages = [
+            Package(
+                title="Kandy Cultural Tour",
+                location="Kandy • Peradeniya",
+                days="2 Days",
+                price="USD 150",
+                image="images/kandy.jpg",
+                description="Explore the sacred Temple of the Tooth, stroll through Royal Botanical Gardens, and experience traditional Kandyan dance."
+            ),
+            Package(
+                title="Yala Wildlife Safari",
+                location="Yala • Tissamaharama",
+                days="3 Days",
+                price="USD 280",
+                image="images/yala_safari.jpg",
+                description="Embark on jeep safaris to spot leopards, elephants, and exotic birds. Stay at a wildlife lodge."
+            ),
+            Package(
+                title="Ella Hiking Adventure",
+                location="Ella • Bandarawela",
+                days="2 Nights",
+                price="USD 160",
+                image="images/ella.jpg",
+                description="Hike Little Adam's Peak, visit Nine Arches Bridge, and enjoy breathtaking mountain views."
+            )
+        ]
+        for p in more_packages:
+            db.session.add(p)
         db.session.commit()
-        flash('Booking updated successfully!', 'success')
-        return redirect(url_for('bookings.my_bookings'))
-    return render_template('edit_booking.html', booking=booking)
-
-@bookings_bp.route('/delete/<int:booking_id>', methods=['POST'])
-@login_required
-def delete_booking(booking_id):
-    booking = Booking.query.get_or_404(booking_id)
-    if booking.user_id != current_user.id:
-        abort(403)
-    db.session.delete(booking)
-    db.session.commit()
-    flash('Booking cancelled.', 'info')
-    return redirect(url_for('bookings.my_bookings'))
+        return "6 packages now available!"
+    else:
+        return "Packages already exist."
